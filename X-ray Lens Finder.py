@@ -17,7 +17,7 @@ from math import pi as PI
 from math import sqrt
 from pylab import *
 
-# Please refer to the paper for more information about Matrix A, B and C.
+# Please refer to the research paper for more information about Matrix A, B and C.
 # Defining function to generate the Matrix C.
 # In matrix C, the first column data are a copy of the first column data in matrix B.
 # The second and third columns contain the Y_downfit and Y_upfit data generated according
@@ -29,7 +29,7 @@ def c_generator(P, x0, y0):
     C[:, 2] = sqrt(2 * P * (C[:, 0] + x0)) - y0   # generate Y_upfit
     return C
 
-# Defining function to generate the FF value, corresponding Eq. 2 in the paper.
+# Defining function to generate the FF value, corresponding Eq. 2 in the research paper.
 def FF_generator(P, x0, y0):
     C = np.zeros((len(B), 3))
     C[:, 0] = B[:, 0]
@@ -44,27 +44,27 @@ def FF_generator(P, x0, y0):
 class PSO():
     # Program initialization,
     # input: Particle number, Dimension, Number of iterations, inertia weight, acceleration factors.
-    def __init__(self, Pnum, dim, max_iter,w_start,w_end, c1, c2):
-        self.Pnum = Pnum                                 # Particle number
-        self.dim = dim                                   # Dimension
-        self.max_iter = max_iter                         # Number of iterations
-        self.w_start = w_start                           # initial inertia weight
-        self.w_end = w_end                               # ultimate inertia weight
-        self.c1 = c1                                     # acceleration factor
-        self.c2 = c2                                     # acceleration factor
-        self.position = np.zeros((self.Pnum, self.dim))  # the initial space for position of all particles
-        self.velocity = np.zeros((self.Pnum, self.dim))  # the initial space for velocity of all particles
-        self.pbest = np.zeros((self.Pnum, self.dim))     # best position of each particle
-        self.gbest = np.zeros((1, self.dim))             # global best position of all particles
-        self.pfit = np.zeros(self.Pnum)                  # the initial space for FF value of all particles
-        self.gfit = 1e15                                 # the initial global FF value in this program
-        self.dimension_max = 10000                       # the maximum value of each dimension, it can be manually
-                                                         # adjusted according to the data to be analyzed.
-        self.dimension_coefficient = 0.2                 # the coefficient to set the maximum velocity according the
-                                                         # maximum value of each dimension.
-        self.PP = 0                                      # the initial P value
-        self.xx0 = 0                                     # the initial x0 value
-        self.yy0 = 0                                     # the initial y0 value
+    def __init__(self, Pnum, dim, max_iter,w_start,w_end, c1, c2,gfit,dimension_max, dimension_coefficient):
+        self.Pnum = Pnum                                    # Particle number
+        self.dim = dim                                      # Dimension
+        self.max_iter = max_iter                            # Number of iterations
+        self.w_start = w_start                              # initial inertia weight
+        self.w_end = w_end                                  # ultimate inertia weight
+        self.c1 = c1                                        # acceleration factor
+        self.c2 = c2                                        # acceleration factor
+        self.position = np.zeros((self.Pnum, self.dim))     # the initial space for position of all particles
+        self.velocity = np.zeros((self.Pnum, self.dim))     # the initial space for velocity of all particles
+        self.pbest = np.zeros((self.Pnum, self.dim))        # best position of each particle
+        self.gbest = np.zeros((1, self.dim))                # global best position of all particles
+        self.pfit = np.zeros(self.Pnum)                     # the initial space for FF value of all particles
+        self.gfit = gfit                                    # the initial global FF value in this program
+        self.dimension_max = dimension_max                  # the maximum value of each dimension, it can be manually
+                                                            # adjusted according to the data to be analyzed.
+        self.dimension_coefficient = dimension_coefficient  # the coefficient to set the maximum velocity according the
+                                                            # maximum value of each dimension.
+        self.PP = 0                                         # the initial P value
+        self.xx0 = 0                                        # the initial x0 value
+        self.yy0 = 0                                        # the initial y0 value
 
     # Defining function to obtain the value of FF.
     def FF_value_function(self, para1, para2, para3):
@@ -116,7 +116,7 @@ class PSO():
                         self.gbest = self.position[i] # Updating the global best position
                         self.gfit = self.pfit[i]      # Updating the global best FF value
 
-            # Explaining the inertia weight in Eq. 3 in the paper.
+            # Explaining the inertia weight in Eq. 3 in the research paper.
             # In PSO program, inertia weight (calculate_w) embodies the ability of particles to inherit previous
             # velocity. It can be selected between 0-1, larger weights are good for global search,
             # and smaller weights are good for local search.
@@ -130,7 +130,7 @@ class PSO():
             # the w_end is the end calculate_w and set to 0.4;
             # the t is the iteration number in the current running process;
             # the self.max_iter is the maximum iteration.
-            # Discussion about inertia weights is no longer in the paper.
+            # Discussion about inertia weights is no longer in the research paper.
             calculate_w = self.w_start - (self.w_start - self.w_end) * (t / self.max_iter) ** 2
             for i in range(self.Pnum):
                 for j in range(self.dim):
@@ -171,7 +171,7 @@ if __name__=='__main__':
     df = pd.read_csv(dir_son + '\\' + 'data.csv')
     dataflow = pd.DataFrame(columns=['x_position', 'data1', 'data2'])
 
-    # Matrixing the data and Generating the matrix A corresponding in the Paper.
+    # Matrixing the data and Generating the matrix A corresponding in the research paper.
     # The first column is the scan position data. The data in the second and third
     # columns are the scanned lower profile Y_down and the upper profile Y_up.
     A = array(df[['Position', 'Data1', 'Data2']])
@@ -183,8 +183,8 @@ if __name__=='__main__':
     # in this program, xx0 represents the parameter x0 in Eq. 1
     # in this program, yy0 represents the parameter y0 in Eq. 1
 
-    # in this program, a represents the parameter M1 in the paper.
-    # in this program, b represents the parameter M2 in the paper.
+    # in this program, a represents the parameter M1 in the research paper.
+    # in this program, b represents the parameter M2 in the research paper.
     # By manually adjusting a and b, we intercepted matrix B from matrix A.
     a = 130
     b = 210
@@ -192,8 +192,9 @@ if __name__=='__main__':
 
     time_start = time.time()                # Recording the system time when the program starts.
     iter = 1000                             # Setting the value of iteration.
-    my_pso = PSO(50,3,iter,0.9,0.4,2,2)     # Instantiating the 'PSO class' into my_pso.
+    my_pso = PSO(50,3,iter,0.9,0.4,2,2,1e15,10000,0.2)     # Instantiating the 'PSO class' into my_pso.
     # The number of particles were set to 50 and the dimension was 3;
+    # the initial gfit was set to 1e15, dimension maximum was set to 10000, the coefficient was set to 0.2;
     # the inertia weight and acceleration factors were set.
 
     # initial the population of my_pso
