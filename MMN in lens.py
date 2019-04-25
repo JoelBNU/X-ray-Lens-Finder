@@ -22,7 +22,7 @@ from pylab import *
 # Defining function to generate the Matrix C.
 # In matrix C, the first column data are a copy of the first column data in matrix B.
 # The second and third columns contain the Y_downfit and Y_upfit data generated according
-# to the first column data and Equation 1 (Eq. 1).
+# to the first column data and Equation 2 (Eq. 2).
 def c_generator(P, x0, y0):
     C = np.zeros((len(B), 3))
     C[:, 0] = B[:, 0] # copy the first column data in B
@@ -30,7 +30,7 @@ def c_generator(P, x0, y0):
     C[:, 2] = sqrt(2 * P * (C[:, 0] + x0)) - y0   # generate Y_upfit
     return C
 
-# Defining function to generate the FF value, corresponding Eq. 2 in the research paper.
+# Defining function to generate the FF value, corresponding Eq. 5 in the research paper.
 def FF_generator(P, x0, y0):
     C = np.zeros((len(B), 3))
     C[:, 0] = B[:, 0]
@@ -62,11 +62,11 @@ if __name__=='__main__':
     A = array(df[['Position', 'Data1', 'Data2']])
     print('The Matrix A is: \n',A)
 
-    # Giving the parameters of Equation 1 (Eq. 1):（y+y0）**2=2P(x+x0)
+    # Giving the parameters of Equation 2 (Eq. 2):（y+y0）**2=2P(x+x0)
     # x is an independent variable and y is a dependent variable.
-    # in this program, PP represents the parameter P in Eq. 1
-    # in this program, xx0 represents the parameter x0 in Eq. 1
-    # in this program, yy0 represents the parameter y0 in Eq. 1
+    # in this program, PP represents the parameter P in Eq. 2
+    # in this program, xx0 represents the parameter x0 in Eq. 2
+    # in this program, yy0 represents the parameter y0 in Eq. 2
 
     # in this program, a represents the parameter M1 in the research paper.
     # in this program, b represents the parameter M2 in the research paper.
