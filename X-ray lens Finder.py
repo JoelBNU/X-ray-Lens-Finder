@@ -43,7 +43,7 @@ def FF_generator(P, x0, y0):
 # Defining the PSO program
 class PSO():
     # Program initialization,
-    # input: Particle number, Dimension, Number of iterations, inertia weight, acceleration factors.
+    # input: Particle number, Dimension, Number of iterations, inertia weight, acceleration factors, gfit, dimension_max, coefficient.
     def __init__(self, Pnum, dim, max_iter,w_start,w_end, c1, c2,gfit,dimension_max, dimension_coefficient):
         self.Pnum = Pnum                                    # Particle number
         self.dim = dim                                      # Dimension
