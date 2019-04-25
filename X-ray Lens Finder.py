@@ -116,7 +116,7 @@ class PSO():
                         self.gbest = self.position[i] # Updating the global best position
                         self.gfit = self.pfit[i]      # Updating the global best FF value
 
-            # Explaining the inertia weight in Eq. 3 in the research paper.
+            # Explaining the inertia weight in Eq. 6 in the research paper.
             # In PSO program, inertia weight (calculate_w) embodies the ability of particles to inherit previous
             # velocity. It can be selected between 0-1, larger weights are good for global search,
             # and smaller weights are good for local search.
@@ -177,11 +177,11 @@ if __name__=='__main__':
     A = array(df[['Position', 'Data1', 'Data2']])
     print('The Matrix A is: \n',A)
 
-    # Giving the parameters of Equation 1 (Eq. 1):（y+y0）**2=2P(x+x0)
+    # Giving the parameters of Equation 2 (Eq. 2):（y+y0）**2=2P(x+x0)
     # x is an independent variable and y is a dependent variable.
-    # in this program, PP represents the parameter P in Eq. 1
-    # in this program, xx0 represents the parameter x0 in Eq. 1
-    # in this program, yy0 represents the parameter y0 in Eq. 1
+    # in this program, PP represents the parameter P in Eq. 2
+    # in this program, xx0 represents the parameter x0 in Eq. 2
+    # in this program, yy0 represents the parameter y0 in Eq. 2
 
     # in this program, a represents the parameter M1 in the research paper.
     # in this program, b represents the parameter M2 in the research paper.
