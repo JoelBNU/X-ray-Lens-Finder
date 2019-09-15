@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 # @Time    : 2018-11-20
 # @Update  : 2019-04-24
+# @Update  : 2019-08-16
+# @Update  : 2019-09-15 leasted one
 # @Author  : Joel
 # @File    :
 # @Site    :
@@ -30,16 +32,16 @@ def c_generator(P, x0, y0):
     C[:, 2] = sqrt(2 * P * (C[:, 0] + x0)) - y0   # generate Y_upfit
     return C
 
-# Defining function to generate the FF value, corresponding Eq. 5 in the research paper.
-def FF_generator(P, x0, y0):
+# Defining function to generate the PE value, corresponding Eq. 5 in the research paper.
+def PE_generator(P, x0, y0):
     C = np.zeros((len(B), 3))
     C[:, 0] = B[:, 0]
     C[:, 1] = -sqrt(2 * P * (C[:, 0] + x0)) - y0
     C[:, 2] = sqrt(2 * P * (C[:, 0] + x0)) - y0
     Value_Error_matrix = (B[:, 1] - C[:, 1]) ** 2 + (B[:, 2] - C[:, 2]) ** 2
     Value_Error_sum = Value_Error_matrix.sum()
-    FF_value = math.sqrt(Value_Error_sum/float(len(B)))
-    return FF_value
+    PE_value = math.sqrt(Value_Error_sum/(2*float(len(B))))
+    return PE_value
 
 
 
@@ -58,7 +60,7 @@ if __name__=='__main__':
 
     # Matrixing the data and Generating the matrix A corresponding in the research paper.
     # The first column is the scan position data. The data in the second and third
-    # columns are the scanned lower profile Y_down and the upper profile Y_up.
+    # columns are the scanned down profile Y_down and the up profile Y_up.
     A = array(df[['Position', 'Data1', 'Data2']])
     print('The Matrix A is: \n',A)
 
@@ -68,39 +70,60 @@ if __name__=='__main__':
     # in this program, xx0 represents the parameter x0 in Eq. 2
     # in this program, yy0 represents the parameter y0 in Eq. 2
 
-    # in this program, a represents the parameter M1 in the research paper.
-    # in this program, b represents the parameter M2 in the research paper.
+    # in this program, a represents the parameter M1 in the research letter.
+    # in this program, b represents the parameter M2 in the research letter.
     # By manually adjusting a and b, we intercepted matrix B from matrix A.
-    a = 130
+    a = 140
     b = 210
-    FFgbest = 1e15
+    PE_cal_timer = 0
     B = A[a:b, ]
     iter = 0 # Recording the iteration
-
+    PEgbest = 100
     time_start = time.time()                # Recording the system time when the program starts.
-    fitness = []                            # Recording the global FF value for each iteration
-    # MMN program, the step and the range corresponding to the paper.
-    for i in range(1, 300, 5):
-        p = i * 0.00001
-        for j in range(1700, 2700, 5):
-            y0 = j * 0.001 * -1
-            for k in range(0, 4000, 5):
-                x0 = k * 0.01 * -1
-                FF = FF_generator(p,x0,y0) # Calculating the FF of Gbest in each iteration.
-                if FF < FFgbest:   # Determining if it is the current global best FF value than before
-                    FFgbest = FF   # Updating the global best FF value
+    PE_fitness = []                            # Recording the global PE value for each iteration
+    timer = []                              # Recording the calculate time
+    # MMN program, the step size and the limited domain corresponding to the paper.
+    start_cal_time = time.time()            # Recording the calculate time
+    for i in range(1, 6000, 5): # -0.003 to 0.003 mm with 0.000005 mm step
+        p = (i-3000) * 0.000001
+        for k in range(0, 20000, 1): #0 to 200 mm with 0.01 mm step
+            x0 = k * 0.01 * -1
+            for j in range(-100, 100, 1):  # -0.001 mm to 0.001 mm range with 0.00001 mm step
+                y0 = j * 0.00001 * -1
+                PE = PE_generator(p,x0,y0) # Calculating the PE of Gbest in each iteration.
+
+                if PE < PEgbest:   # Determining if it is the current global best PE value than before
+                    if (PEgbest-PE)/PEgbest <1e-12:   #setting the termination parameter to 1e-10%
+                        print('The difference of two steps is',(PEgbest-PE))
+                        break
+                        # (PEgbest-PE)/PEgbest is sign as termination parameter.
+                        #we believe that the termination parameter (a percentage number) is scientific and effective in
+                        # the MMN software.
+                        #This is because when the MMN algorithm is used to find the location of the target solution in
+                        # the limited domain space, if the loop gradient and the termination parameter are set properly,
+                        # the termination parameter can be triggered to help the users save time cost.
+                        # If the termination parameter is too small, it may not be triggered and all limited domain may
+                        # be traversed.
+                        # If the termination parameter is too large, the convergence process may be terminated
+                        # prematurely in a converged platform region.
+                        # Therefore, a reasonable termination parameter is a key step to save time cost.
+                        # In combination with the engineering practice (please refer to research paper),
+                        # it is reasonable to set the percentage number to 1e-10%, which means 1e-12 in number.
+
+                    PEgbest = PE   # Updating the global best PE value
                     PP = p         # Updating the global best PP
                     xx0 = x0       # Updating the global best xx0
                     yy0 = y0       # Updating the global best yy0
-                # Recording the global best FF value and print it at each iteration.
-                fitness.append(FFgbest)
-                print(FFgbest)
-                iter = iter + 1
-
+                    # Recording the global best PE value.
+                    PE_fitness.append(PEgbest)
+                    time_cal_temp = time.time() #Recording the time point when the best Fitness-value was changed.
+                    timer.append(time_cal_temp-start_cal_time)
+                #iter = iter + 1
+        print(PEgbest)
     print('The final P is', PP)
     print('The final y0 is', yy0)
     print('The final x0 is', xx0)
-    print('The FF of Gbest is', FFgbest)
+    print('The PE of Gbest is', PEgbest)
     C = c_generator(PP,xx0,yy0)
 
     # Recording the system time when the program finished and print the running time.
@@ -108,46 +131,31 @@ if __name__=='__main__':
     print('total run cost is ',time_end-time_start)
 
     # Using matplotlib program package to draw the result figures.
-    # Drawing the curve diagram of  Global FF value and iterations.
+    # Drawing  the inner profile curves for the unequal diameter glass tube (Matrix A) and the
+    # parabolic lens found by PSO (Matrix C).
     plt.figure(1)
     plt.title("")
-    plt.xlabel("iteration", size=14)
-    plt.ylabel("FF of Gbest", size=14)
-    t = np.array([t for t in range(0, iter)])
-    fitness = np.array(fitness)
-    label_fitness, = plt.plot(t, fitness, color='b', linewidth=3)
-    plt.legend(handles=[label_fitness], labels=['FF of Gbest'], loc='upper right')
-    plt.savefig('FF of Gbest.png', dpi=300)
+    plt.xlabel("X-axis / mm", size=14)
+    plt.ylabel("Y-axis / mm", size=14)
+    label_A, = plt.plot(A[:,0],A[:,1], color='k',linewidth=4)
+    label_A, = plt.plot(A[:,0],A[:,2], color='k',linewidth=4)
+    label_c, = plt.plot(C[:,0],C[:,1], 'r|',linewidth=4,markersize=10)
+    label_c, = plt.plot(C[:,0],C[:,2], 'r|',linewidth=4,markersize=10)
+    plt.legend(handles=[label_A, label_c], labels=['Unequal diameter glass tube profile curve', 'Intercepted part profile curve'], loc='upper left')
+    plt.savefig('Intercepted part on the glass tube.png', dpi=600)
     plt.show()
 
     # Using matplotlib program package to draw the result figures.
-    # Drawing the details of the inner profile curves of the long lens in the intercepting area
-    # (Matrix B) and the parabolic lens in the intercepting area (Matrix C).
+    # Drawing the curve diagram of Global PE value and calculate_time.
     plt.figure(2)
     plt.title("")
-    plt.xlabel("X-axis / mm", size=14)
-    plt.ylabel("Y-axis / mm", size=14)
-    label_B, = plt.plot(B[:,0],B[:,1], color='b',linewidth=3)
-    label_B, = plt.plot(B[:,0],B[:,2], color='b',linewidth=3)
-    label_C, = plt.plot(C[:,0],C[:,1], color='r',linewidth=3)
-    label_C, = plt.plot(C[:,0],C[:,2], color='r',linewidth=3)
-    plt.legend(handles = [label_B,label_C],labels= ['Real profile curve','Fitting profile curve'],loc = 'upper left')
-    plt.savefig('detail.png', dpi=300)
-    plt.show()
-
-    # Using matplotlib program package to draw the result figures.
-    # Drawing  the inner profile curves for the long lens (Matrix A) and the
-    # parabolic lens found by PSO (Matrix C).
-    plt.figure(3)
-    plt.title("")
-    plt.xlabel("X-axis / mm", size=14)
-    plt.ylabel("Y-axis / mm", size=14)
-    label_A, = plt.plot(A[:,0],A[:,1], color='b',linewidth=3)
-    label_A, = plt.plot(A[:,0],A[:,2], color='b',linewidth=3)
-    label_c, = plt.plot(C[:,0],C[:,1], color='r',linewidth=3)
-    label_c, = plt.plot(C[:,0],C[:,2], color='r',linewidth=3)
-    plt.legend(handles=[label_A, label_c], labels=['Real all profile curve', 'Fitting profile curve'], loc='upper left')
-    plt.savefig('whole.png', dpi=300)
+    plt.xlabel("Run time / s", size=14)
+    plt.ylabel("PE / mm", size=14)
+    timer = np.array(timer)
+    PE_fitness = np.array(PE_fitness)
+    label_fitness, = plt.plot(timer, PE_fitness, color='b', linewidth=3)
+    plt.legend(handles=[label_fitness], labels=['Global best PE value'], loc='upper right')
+    plt.savefig('PE value with time.png', dpi=600)
     plt.show()
 
     #Saving the results to Files
