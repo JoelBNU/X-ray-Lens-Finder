@@ -1,4 +1,4 @@
-# PSOinlens
+# X-ray Lens Finder
 
 A program with the particle swarm optimization algorithm for designing the mono-capillary X-ray lens
 
