@@ -141,7 +141,7 @@ if __name__=='__main__':
     label_A, = plt.plot(A[:,0],A[:,2], color='k',linewidth=4)
     label_c, = plt.plot(C[:,0],C[:,1], 'r|',linewidth=4,markersize=10)
     label_c, = plt.plot(C[:,0],C[:,2], 'r|',linewidth=4,markersize=10)
-    plt.legend(handles=[label_A, label_c], labels=['Unequal diameter glass tube profile curve', 'Intercepted part profile curve'], loc='upper left')
+    plt.legend(handles=[label_A, label_c], labels=['Varying diameter glass tube profile curve', 'Cut part profile curve'], loc='upper left')
     plt.savefig('Intercepted part on the glass tube.png', dpi=600)
     plt.show()
 
